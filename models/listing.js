@@ -19,8 +19,9 @@ const ListingSchema = new Schema({
                     : v, // Set a default value if the image is empty
     },
     price : Number,
-    location : String,
     country : String,
+    location : String,
+    
 
 });
 
