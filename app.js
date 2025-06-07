@@ -36,7 +36,18 @@ async function main() {
 
 app.get("/" , (req,res) => {
     res.send("Hello World App");
-})
+});
+
+const validateListing = (req, res, next) =>{
+    let { error } = listingSchema.validate(req.body);
+    if ( error ){
+        let errMsg = error.details.map((el) => el.message).join(",");
+        throw new ExpressError(400, errMsg);
+    }else{
+        next();
+    }
+}
+
 //index route
 app.get("/listings" ,  wrapAsync(async(req,res) => {
     const allListings = await Listing.find({});
@@ -57,7 +68,7 @@ app.get("/listings/:id" ,  wrapAsync(async(req,res) => {
 }));
 
 //Create Rojute
-app.post("/listings", wrapAsync(async (req,res,next) =>{
+app.post("/listings", validateListing, wrapAsync(async (req,res,next) =>{
         let results = listingSchema.validate(req.body);
         if(results.error){
             throw new ExpressError(404, request.error);
@@ -76,11 +87,11 @@ app.get("/listings/:id/edit",  wrapAsync(async(req, res) => {
 }));
 
 //Update Route
-app.put("/listings/:id", async(req,res) => {
+app.put("/listings/:id", validateListing, wrapAsync (async(req,res) => {
     let {id} = req.params;
     await Listing.findByIdAndUpdate(id, {...req.body.listing});
     res.redirect(`/listings/${id}`);
-})
+}));
 
 //Delete ROute
 app.delete("/listings/:id",  wrapAsync(async(req,res) => {
